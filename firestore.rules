@@ -1,0 +1,97 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users
+// Document ID: userId
+// Fields:
+//   - library: array of book metadata (id, title, color, lastEdited, wordCount)
+//   - anthropicKey: string (optional)
+//
+// Collection: users/{userId}/books
+// Document ID: bookId
+// Fields:
+//   - id: string
+//   - title: string
+//   - type: string (standalone, saga)
+//   - color: string
+//   - sagaName: string
+//   - sagaOrder: number
+//   - connectedTo: list of strings
+//   - createdAt: timestamp
+//   - lastEdited: timestamp
+//   - wordCount: number
+//   - idea: string
+//   - synopsis: string
+//   - outline: string
+//   - beats: string
+//   - prose: string
+//   - step: number
+//   - manuscript: string
+//   - characters: list of maps
+//   - world: map
+//   - structure: map
+//   - escaleta: list of maps
+//   - chapters: list of maps
+//   - codex: list of maps
+//   - lorebook: list of maps
+//   - bsfavs: list of strings
+//   - mapnodes: list of maps
+//   - maplinks: list of maps
+//   - linkedDocId: string
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function validStringLength(field, minLen, maxLen) {
+      return request.resource.data[field] is string &&
+        request.resource.data[field].size() >= minLen &&
+        request.resource.data[field].size() <= maxLen;
+    }
+
+    function isValidUser(data) {
+      return true; // Simplified for this app as it's mostly user-owned data
+    }
+
+    function isValidBook(data) {
+      return data.id is string &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+
+      match /books/{bookId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,158 @@
+{
+  "entities": {
+    "Book": {
+      "title": "Book",
+      "description": "A book project",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "type": { "type": "string", "enum": ["standalone", "saga"] },
+        "color": { "type": "string" },
+        "sagaName": { "type": "string" },
+        "sagaOrder": { "type": "number" },
+        "connectedTo": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "lastEdited": { "type": "string", "format": "date-time" },
+        "wordCount": { "type": "number" },
+        "idea": { "type": "string" },
+        "synopsis": { "type": "string" },
+        "outline": { "type": "string" },
+        "beats": { "type": "string" },
+        "prose": { "type": "string" },
+        "step": { "type": "number" },
+        "manuscript": { "type": "string" },
+        "linkedDocId": { "type": "string" }
+      },
+      "required": ["id", "title", "type", "createdAt"]
+    },
+    "Character": {
+      "title": "Character",
+      "description": "A character in the story",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string", "enum": ["protagonist", "antagonist", "secondary", "mentor", "other"] },
+        "appearance": { "type": "string" },
+        "fears": { "type": "string" },
+        "secret": { "type": "string" },
+        "ghost": { "type": "string" },
+        "arcStart": { "type": "string" },
+        "arcEnd": { "type": "string" },
+        "arcHow": { "type": "string" }
+      },
+      "required": ["id", "name", "role"]
+    },
+    "WorldData": {
+      "title": "WorldData",
+      "description": "Worldbuilding information",
+      "type": "object",
+      "properties": {
+        "genre": { "type": "string" },
+        "magicRules": { "type": "string" },
+        "geography": { "type": "string" },
+        "society": { "type": "string" },
+        "tone": { "type": "string" }
+      }
+    },
+    "Structure": {
+      "title": "Structure",
+      "description": "Story structure and themes",
+      "type": "object",
+      "properties": {
+        "premise": { "type": "string" },
+        "theme": { "type": "string" },
+        "pov": { "type": "string" },
+        "incitingIncident": { "type": "string" },
+        "midpointTwist": { "type": "string" },
+        "darkNight": { "type": "string" },
+        "climax": { "type": "string" },
+        "plotTwists": { "type": "string" }
+      }
+    },
+    "Escaleta": {
+      "title": "Escaleta",
+      "description": "A scene in the story",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "summary": { "type": "string" },
+        "goal": { "type": "string" },
+        "conflict": { "type": "string" },
+        "hook": { "type": "string" }
+      },
+      "required": ["id", "title"]
+    },
+    "Chapter": {
+      "title": "Chapter",
+      "description": "A chapter in the story",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "notes": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "wip", "done"] }
+      },
+      "required": ["id", "title"]
+    },
+    "Codex": {
+      "title": "Codex",
+      "description": "A codex entry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["personaje", "lugar", "objeto", "mitología", "otro"] },
+        "desc": { "type": "string" }
+      },
+      "required": ["id", "name", "type"]
+    },
+    "Lorebook": {
+      "title": "Lorebook",
+      "description": "A lorebook entry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "keywords": { "type": "array", "items": { "type": "string" } },
+        "content": { "type": "string" }
+      },
+      "required": ["id", "keywords", "content"]
+    },
+    "MapNode": {
+      "title": "MapNode",
+      "description": "A node in the relationship map",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "label": { "type": "string" },
+        "type": { "type": "string" },
+        "group": { "type": "string" }
+      },
+      "required": ["id", "label"]
+    },
+    "MapLink": {
+      "title": "MapLink",
+      "description": "A link in the relationship map",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "source": { "type": "string" },
+        "target": { "type": "string" },
+        "label": { "type": "string" }
+      },
+      "required": ["id", "source", "target"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "object",
+      "description": "User profile and library"
+    },
+    "/users/{userId}/books/{bookId}": {
+      "schema": "Book",
+      "description": "Book data"
+    }
+  }
+}
