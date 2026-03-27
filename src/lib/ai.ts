@@ -1,5 +1,4 @@
 import { GoogleGenAI } from "@google/genai";
-import Anthropic from "@anthropic-ai/sdk";
 import { AISettings } from "../types";
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
@@ -20,30 +19,29 @@ export async function callAI(
     }
 
     try {
-      const anthropic = new Anthropic({
-        apiKey,
-        dangerouslyAllowBrowser: true
+      const response = await fetch("/api/ai/claude", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messages,
+          systemInstruction,
+          maxTokens,
+          apiKey,
+        }),
       });
 
-      const response = await anthropic.messages.create({
-        model: "claude-3-5-sonnet-20240620",
-        max_tokens: maxTokens,
-        system: systemInstruction,
-        messages: messages.map(m => ({
-          role: m.role === "user" ? "user" : "assistant",
-          content: m.content
-        })) as any,
-      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error calling Claude API via server proxy");
+      }
 
-      const text = response.content
-        .filter(c => c.type === 'text')
-        .map(c => (c as any).text)
-        .join('\n');
-
-      return text || "";
+      const data = await response.json();
+      return data.text || "";
     } catch (error: any) {
-      console.error("[AI] Claude Error:", error);
-      throw new Error(`Error de Claude: ${error.message || "Error desconocido"}`);
+      console.error("[AI] Claude Proxy Error:", error);
+      throw new Error(`Error de Claude (Proxy): ${error.message || "Error desconocido"}`);
     }
   } else {
     // Default to Gemini

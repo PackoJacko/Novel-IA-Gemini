@@ -3,6 +3,7 @@ import { auth, db, googleProvider, handleFirestoreError, OperationType } from '.
 import { onAuthStateChanged, signInWithPopup, User, signOut } from 'firebase/auth';
 import { doc, onSnapshot, setDoc, collection, writeBatch, deleteDoc } from 'firebase/firestore';
 import { Book } from './types';
+import { callAI } from './lib/ai';
 import DeskScene from './components/DeskScene';
 import LibraryPanel from './components/LibraryPanel';
 import NewBookModal from './components/NewBookModal';
@@ -20,8 +21,7 @@ import Brainstorm from './components/Brainstorm';
 import MapComp from './components/Map';
 import ImportComp from './components/Import';
 import PublishComp from './components/Publish';
-import { callAI } from './lib/ai';
-import { LogOut, Settings, Home, Cloud, CloudOff, Loader2, Cpu, Key, Menu } from 'lucide-react';
+import { LogOut, Settings, Home, Cloud, CloudOff, Loader2, Cpu, Key, Menu, Sparkles } from 'lucide-react';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -37,6 +37,7 @@ export default function App() {
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [globalAiSettings, setGlobalAiSettings] = useState<any>({ provider: 'gemini' });
+  const [testingAi, setTestingAi] = useState(false);
 
   // Auth listener
   useEffect(() => {
@@ -144,6 +145,25 @@ export default function App() {
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, path);
     }
+  };
+
+  const testClaude = async () => {
+    if (!globalAiSettings?.claudeApiKey) {
+      alert("Por favor, introduce tu clave API de Claude.");
+      return;
+    }
+    setTestingAi(true);
+    try {
+      const r = await callAI([{ role: "user", content: "Hola, ¿estás ahí? Responde solo con 'OK'." }], "Test", 10, globalAiSettings);
+      if (r.includes("OK")) {
+        alert("¡Conexión exitosa con Claude!");
+      } else {
+        alert("Claude respondió, pero no como se esperaba: " + r);
+      }
+    } catch (e: any) {
+      alert("Error de conexión: " + e.message);
+    }
+    setTestingAi(false);
   };
 
   const createBook = async (data: any) => {
@@ -322,6 +342,14 @@ export default function App() {
                     <p className="text-[9px] text-[#c8b4ff]/30 font-serif leading-tight">
                       Tu clave se guarda de forma segura en tu base de datos privada de Firebase.
                     </p>
+                    <button 
+                      onClick={testClaude}
+                      disabled={testingAi}
+                      className="w-full mt-2 py-2 rounded-lg bg-[#7c3aed]/10 border border-[#7c3aed]/30 text-[#c8b4ff] hover:bg-[#7c3aed]/20 transition-all text-[10px] font-serif flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      {testingAi ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                      {testingAi ? "Probando..." : "Probar conexión"}
+                    </button>
                   </div>
                 )}
               </div>
