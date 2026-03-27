@@ -29,6 +29,7 @@ export async function callAI(
           systemInstruction,
           maxTokens,
           apiKey,
+          model: settings?.claudeModel,
         }),
       });
 

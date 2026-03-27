@@ -33,6 +33,7 @@ export interface Book {
 export interface AISettings {
   provider: 'gemini' | 'claude';
   claudeApiKey?: string;
+  claudeModel?: string;
 }
 
 export interface Character {

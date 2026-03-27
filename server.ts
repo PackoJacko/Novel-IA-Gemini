@@ -16,7 +16,7 @@ async function startServer() {
 
   // API route for Claude proxy
   app.post("/api/ai/claude", async (req, res) => {
-    const { messages, systemInstruction, maxTokens, apiKey } = req.body;
+    const { messages, systemInstruction, maxTokens, apiKey, model } = req.body;
 
     if (!apiKey) {
       return res.status(400).json({ error: "Claude API Key is missing." });
@@ -28,7 +28,7 @@ async function startServer() {
       });
 
       const response = await anthropic.messages.create({
-        model: "claude-3-5-sonnet-20240620",
+        model: model || "claude-3-5-sonnet-latest",
         max_tokens: maxTokens || 2000,
         system: systemInstruction,
         messages: messages.map((m: any) => ({

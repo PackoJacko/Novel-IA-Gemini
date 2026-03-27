@@ -328,17 +328,36 @@ export default function App() {
                 </div>
 
                 {globalAiSettings?.provider === 'claude' && (
-                  <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <label className="block text-xs text-[#c8b4ff]/60 font-serif flex items-center gap-2">
-                      <Key size={12} /> Claude API Key
-                    </label>
-                    <input 
-                      type="password"
-                      placeholder="sk-ant-..."
-                      value={globalAiSettings?.claudeApiKey || ""}
-                      onChange={e => saveGlobalSettings({ aiSettings: { ...globalAiSettings, claudeApiKey: e.target.value } })}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg py-2 px-3 text-xs text-white font-mono outline-none focus:border-[#7c3aed]/50 transition-all"
-                    />
+                  <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="space-y-2">
+                      <label className="block text-xs text-[#c8b4ff]/60 font-serif flex items-center gap-2">
+                        <Cpu size={12} /> Modelo de Claude
+                      </label>
+                      <select 
+                        value={globalAiSettings?.claudeModel || "claude-3-5-sonnet-latest"}
+                        onChange={e => saveGlobalSettings({ aiSettings: { ...globalAiSettings, claudeModel: e.target.value } })}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg py-2 px-3 text-xs text-white font-serif outline-none focus:border-[#7c3aed]/50 transition-all appearance-none"
+                      >
+                        <option value="claude-3-5-sonnet-latest" className="bg-[#1a1625]">Claude 3.5 Sonnet (Recomendado)</option>
+                        <option value="claude-3-5-haiku-latest" className="bg-[#1a1625]">Claude 3.5 Haiku (Más rápido)</option>
+                        <option value="claude-3-opus-20240229" className="bg-[#1a1625]">Claude 3 Opus (Más potente)</option>
+                        <option value="claude-3-sonnet-20240229" className="bg-[#1a1625]">Claude 3 Sonnet</option>
+                        <option value="claude-3-haiku-20240307" className="bg-[#1a1625]">Claude 3 Haiku</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="block text-xs text-[#c8b4ff]/60 font-serif flex items-center gap-2">
+                        <Key size={12} /> Claude API Key
+                      </label>
+                      <input 
+                        type="password"
+                        placeholder="sk-ant-..."
+                        value={globalAiSettings?.claudeApiKey || ""}
+                        onChange={e => saveGlobalSettings({ aiSettings: { ...globalAiSettings, claudeApiKey: e.target.value } })}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg py-2 px-3 text-xs text-white font-mono outline-none focus:border-[#7c3aed]/50 transition-all"
+                      />
+                    </div>
                     <p className="text-[9px] text-[#c8b4ff]/30 font-serif leading-tight">
                       Tu clave se guarda de forma segura en tu base de datos privada de Firebase.
                     </p>
