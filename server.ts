@@ -1,4 +1,5 @@
 import express from "express";
+console.log("[Server] Starting server.ts...");
 import { createServer as createViteServer } from "vite";
 import path from "path";
 import cors from "cors";
@@ -13,6 +14,14 @@ async function startServer() {
 
   app.use(cors());
   app.use(express.json());
+
+  console.log("[Server] Initializing routes...");
+
+  // Health check
+  app.get("/api/health", (req, res) => {
+    console.log("[Server] Health check requested");
+    res.json({ status: "ok", message: "Server is running" });
+  });
 
   // API route for Claude proxy
   app.post("/api/ai/claude", async (req, res) => {

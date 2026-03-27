@@ -38,9 +38,21 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [globalAiSettings, setGlobalAiSettings] = useState<any>({ provider: 'gemini' });
   const [testingAi, setTestingAi] = useState(false);
+  const [serverStatus, setServerStatus] = useState<'checking' | 'ok' | 'error'>('checking');
 
   // Auth listener
   useEffect(() => {
+    const checkServer = async () => {
+      try {
+        const res = await fetch("/api/health");
+        if (res.ok) setServerStatus('ok');
+        else setServerStatus('error');
+      } catch (e) {
+        setServerStatus('error');
+      }
+    };
+    checkServer();
+
     const unsub = onAuthStateChanged(auth, (fbUser) => {
       setUser(fbUser);
       setAuthReady(true);
@@ -307,6 +319,7 @@ export default function App() {
               <div className="space-y-4 pt-4 border-t border-[#7c3aed]/15">
                 <h4 className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-widest font-serif flex items-center gap-2">
                   <Cpu size={12} /> Configuración de IA
+                  <span className={`ml-auto w-2 h-2 rounded-full ${serverStatus === 'ok' ? 'bg-green-500' : serverStatus === 'checking' ? 'bg-yellow-500 animate-pulse' : 'bg-red-500'}`} title={serverStatus === 'ok' ? 'Servidor activo' : 'Servidor inactivo'} />
                 </h4>
                 
                 <div className="space-y-3">
