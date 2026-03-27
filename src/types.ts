@@ -73,6 +73,7 @@ export interface Escaleta {
 export interface Chapter {
   id: string;
   title: string;
+  content?: string;
   notes?: string;
   status: 'draft' | 'wip' | 'done';
 }

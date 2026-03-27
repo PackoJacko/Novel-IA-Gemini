@@ -23,13 +23,22 @@ export default function PublishComp({ book, onUpdate }: PublishProps) {
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  const getFullText = () => {
+    if (book?.manuscript) return book.manuscript;
+    if (book?.chapters?.length) {
+      return book.chapters.map(c => `## ${c.title}\n\n${c.content || ""}`).join("\n\n");
+    }
+    return "";
+  };
+
   const generate = async () => {
-    if (!format || !book?.manuscript) return;
+    const fullText = getFullText();
+    if (!format || !fullText) return;
     setBusy(true);
     setResult("");
     const fmt = FORMATS.find(f => f.id === format);
     try {
-      const r = await callAI([{ role: "user", content: `Adapta el siguiente texto al formato: ${fmt?.label}. \n\nTEXTO:\n${book.manuscript.substring(0, 5000)}` }], "Editor profesional.", 1500);
+      const r = await callAI([{ role: "user", content: `Adapta el siguiente texto al formato: ${fmt?.label}. \n\nTEXTO:\n${fullText.substring(0, 5000)}` }], "Editor profesional.", 1500);
       setResult(r);
     } catch (e) {
       console.error(e);
@@ -98,11 +107,11 @@ export default function PublishComp({ book, onUpdate }: PublishProps) {
                 </div>
                 <div className="p-3 bg-[#f8f7f5] rounded-xl border border-[#e8e5f0]">
                   <div className="text-[10px] font-bold text-[#a09ab8] uppercase tracking-widest mb-1 font-serif">Extensión</div>
-                  <div className="text-xs text-[#1a1825] font-serif font-semibold">{(book?.manuscript || "").split(/\s+/).filter(Boolean).length} palabras</div>
+                  <div className="text-xs text-[#1a1825] font-serif font-semibold">{getFullText().split(/\s+/).filter(Boolean).length} palabras</div>
                 </div>
                 <button 
                   onClick={generate} 
-                  disabled={busy || !book?.manuscript}
+                  disabled={busy || !getFullText()}
                   className="w-full py-3 bg-[#7c3aed] text-white rounded-xl font-serif font-bold text-sm shadow-lg hover:shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2"
                 >
                   {busy ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />}
