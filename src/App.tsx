@@ -20,7 +20,8 @@ import Brainstorm from './components/Brainstorm';
 import MapComp from './components/Map';
 import ImportComp from './components/Import';
 import PublishComp from './components/Publish';
-import { LogOut, Settings, Home, Cloud, CloudOff, Loader2 } from 'lucide-react';
+import { callAI } from './lib/ai';
+import { LogOut, Settings, Home, Cloud, CloudOff, Loader2, Cpu, Key } from 'lucide-react';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -253,6 +254,50 @@ export default function App() {
                     <div className="text-xs text-[#c8b4ff]/40 font-serif truncate">{user?.email}</div>
                   </div>
                 </div>
+
+                {/* AI Settings */}
+                <div className="space-y-4 pt-4 border-t border-[#7c3aed]/15">
+                  <h4 className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-widest font-serif flex items-center gap-2">
+                    <Cpu size={12} /> Configuración de IA
+                  </h4>
+                  
+                  <div className="space-y-3">
+                    <label className="block text-xs text-[#c8b4ff]/60 font-serif">Proveedor de IA</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button 
+                        onClick={() => saveBookData({ aiSettings: { ...activeBook?.aiSettings, provider: 'gemini' } as any })}
+                        className={`py-2 px-3 rounded-lg border text-xs font-serif transition-all ${activeBook?.aiSettings?.provider !== 'claude' ? 'bg-[#7c3aed]/20 border-[#7c3aed] text-white' : 'bg-white/5 border-white/10 text-[#c8b4ff]/40 hover:bg-white/10'}`}
+                      >
+                        Google Gemini
+                      </button>
+                      <button 
+                        onClick={() => saveBookData({ aiSettings: { ...activeBook?.aiSettings, provider: 'claude' } as any })}
+                        className={`py-2 px-3 rounded-lg border text-xs font-serif transition-all ${activeBook?.aiSettings?.provider === 'claude' ? 'bg-[#7c3aed]/20 border-[#7c3aed] text-white' : 'bg-white/5 border-white/10 text-[#c8b4ff]/40 hover:bg-white/10'}`}
+                      >
+                        Anthropic Claude
+                      </button>
+                    </div>
+                  </div>
+
+                  {activeBook?.aiSettings?.provider === 'claude' && (
+                    <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <label className="block text-xs text-[#c8b4ff]/60 font-serif flex items-center gap-2">
+                        <Key size={12} /> Claude API Key
+                      </label>
+                      <input 
+                        type="password"
+                        placeholder="sk-ant-..."
+                        value={activeBook?.aiSettings?.claudeApiKey || ""}
+                        onChange={e => saveBookData({ aiSettings: { ...activeBook?.aiSettings, claudeApiKey: e.target.value } as any })}
+                        className="w-full bg-white/5 border border-white/10 rounded-lg py-2 px-3 text-xs text-white font-mono outline-none focus:border-[#7c3aed]/50 transition-all"
+                      />
+                      <p className="text-[9px] text-[#c8b4ff]/30 font-serif leading-tight">
+                        Tu clave se guarda de forma segura en tu base de datos privada de Firebase.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
                 <button 
                   onClick={handleLogout}
                   className="w-full py-3 rounded-xl border border-[#c8b4ff]/15 bg-transparent text-[#c8b4ff]/60 hover:bg-white/5 transition-all text-sm font-serif flex items-center justify-center gap-2"

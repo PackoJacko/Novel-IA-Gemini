@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Book, Chapter } from '../types';
-import { callAI } from '../lib/gemini';
+import { callAI } from '../lib/ai';
 import { Edit3, Sparkles, Loader2, X, Check, Plus, Trash2, ChevronRight, BookOpen, Wand2 } from 'lucide-react';
 
 interface ManuscriptProps {
@@ -118,7 +118,7 @@ export default function Manuscript({ book, onUpdate }: ManuscriptProps) {
       metafora: "Añade metáforas:",
     };
     try {
-      const r = await callAI([{ role: "user", content: pm[mode] + "\n\n\"" + selText + "\"" }], "Novelista experto." + buildCtx(), 800);
+      const r = await callAI([{ role: "user", content: pm[mode] + "\n\n\"" + selText + "\"" }], "Novelista experto." + buildCtx(), 800, book?.aiSettings);
       setModal({ type: 'rewrite', mode, results: r });
     } catch (e) {
       console.error(e);
@@ -136,7 +136,7 @@ export default function Manuscript({ book, onUpdate }: ManuscriptProps) {
       Usa toda la información de contexto proporcionada. 
       Mínimo 1000 palabras. Estilo literario de alta calidad.`;
       
-      const r = await callAI([{ role: "user", content: prompt }], "Maestro novelista. Contexto:\n" + buildCtx(), 2000);
+      const r = await callAI([{ role: "user", content: prompt }], "Maestro novelista. Contexto:\n" + buildCtx(), 2000, book?.aiSettings);
       setModal({ type: 'generate', mode: activeChapter.title, results: r });
     } catch (e) {
       console.error(e);

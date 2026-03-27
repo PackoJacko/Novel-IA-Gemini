@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Book, Character } from '../types';
 import { User, Plus, Trash2, Edit2, X, Check, Sparkles, Loader2 } from 'lucide-react';
-import { callAI } from '../lib/gemini';
+import { callAI } from '../lib/ai';
 
 interface CharactersProps {
   book: Book | null;
@@ -42,7 +42,7 @@ export default function Characters({ book, onUpdate }: CharactersProps) {
     setBusy(true);
     setAiField(field);
     try {
-      const r = await callAI([{ role: "user", content: prompt }], "Psicólogo narrativo.", 500);
+      const r = await callAI([{ role: "user", content: prompt }], "Psicólogo narrativo.", 500, book?.aiSettings);
       setForm(prev => ({ ...prev, [field]: r }));
     } catch (e) {
       console.error(e);

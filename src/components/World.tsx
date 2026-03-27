@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Book, WorldData } from '../types';
 import { Globe, Sparkles, Loader2 } from 'lucide-react';
-import { callAI } from '../lib/gemini';
+import { callAI } from '../lib/ai';
 
 interface WorldProps {
   book: Book | null;
@@ -22,7 +22,7 @@ export default function World({ book, onUpdate }: WorldProps) {
     setBusy(true);
     setAiField(field);
     try {
-      const r = await callAI([{ role: "user", content: `Expande la sección de "${label}" para una historia con esta idea: ${book?.idea}` }], "Worldbuilder experto.", 600);
+      const r = await callAI([{ role: "user", content: `Expande la sección de "${label}" para una historia con esta idea: ${book?.idea}` }], "Worldbuilder experto.", 600, book?.aiSettings);
       saveWorld({ [field]: r });
     } catch (e) {
       console.error(e);

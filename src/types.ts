@@ -27,6 +27,12 @@ export interface Book {
   mapnodes?: MapNode[];
   maplinks?: MapLink[];
   linkedDocId?: string | null;
+  aiSettings?: AISettings;
+}
+
+export interface AISettings {
+  provider: 'gemini' | 'claude';
+  claudeApiKey?: string;
 }
 
 export interface Character {

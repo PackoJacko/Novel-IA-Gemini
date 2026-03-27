@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Book, Structure } from '../types';
 import { Diamond, Sparkles, Loader2 } from 'lucide-react';
-import { callAI } from '../lib/gemini';
+import { callAI } from '../lib/ai';
 
 interface StructureProps {
   book: Book | null;
@@ -22,7 +22,7 @@ export default function StructureComp({ book, onUpdate }: StructureProps) {
     setBusy(true);
     setAiField(field);
     try {
-      const r = await callAI([{ role: "user", content: `Genera opciones para "${label}" en una historia con esta idea: ${book?.idea}` }], "Experto en estructura narrativa.", 600);
+      const r = await callAI([{ role: "user", content: `Genera opciones para "${label}" en una historia con esta idea: ${book?.idea}` }], "Experto en estructura narrativa.", 600, book?.aiSettings);
       saveStr({ [field]: r });
     } catch (e) {
       console.error(e);

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Book } from '../types';
 import { Download, FileText, Loader2, Check, X, AlertCircle, Sparkles } from 'lucide-react';
-import { callAI } from '../lib/gemini';
+import { callAI } from '../lib/ai';
 import * as mammoth from 'mammoth';
 
 interface ImportProps {
@@ -74,7 +74,7 @@ export default function ImportComp({ book, onUpdate }: ImportProps) {
     ${combined.substring(0, 10000)}`;
 
     try {
-      const r = await callAI([{ role: "user", content: prompt }], "Analista literario experto. Responde solo JSON.", 2000);
+      const r = await callAI([{ role: "user", content: prompt }], "Analista literario experto. Responde solo JSON.", 2000, book?.aiSettings);
       const jsonStr = r.replace(/```json|```/g, "").trim();
       const parsed = JSON.parse(jsonStr);
       setExtracted(parsed);

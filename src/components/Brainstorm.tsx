@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Book } from '../types';
 import { Sparkles, Star, X, Loader2 } from 'lucide-react';
-import { callAI } from '../lib/gemini';
+import { callAI } from '../lib/ai';
 
 interface BrainstormProps {
   book: Book | null;
@@ -21,7 +21,7 @@ export default function Brainstorm({ book, onUpdate }: BrainstormProps) {
   const run = async () => {
     setBusy(true);
     try {
-      const r = await callAI([{ role: "user", content: `Genera 10 ideas creativas para: ${cat}${ctx ? `\nContexto adicional: ${ctx}` : ""}\nUna idea por línea, sin numeración.` }], "Generador creativo de ideas.", 600);
+      const r = await callAI([{ role: "user", content: `Genera 10 ideas creativas para: ${cat}${ctx ? `\nContexto adicional: ${ctx}` : ""}\nUna idea por línea, sin numeración.` }], "Generador creativo de ideas.", 600, book?.aiSettings);
       setResults(r.split("\n").map(l => l.trim()).filter(Boolean).slice(0, 10));
     } catch (e) {
       console.error(e);

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Book } from '../types';
-import { callAI } from '../lib/gemini';
+import { callAI } from '../lib/ai';
 import { Zap, RotateCcw, ArrowRight, Loader2 } from 'lucide-react';
 
 interface EngineProps {
@@ -34,16 +34,16 @@ export default function Engine({ book, onUpdate }: EngineProps) {
     const ctx = buildCtx();
     try {
       if (step === 0) {
-        const r = await callAI([{ role: "user", content: "Sinopsis apasionante de 4 párrafos:\n\n" + book.idea }], "Maestro novelista en español." + ctx, 800);
+        const r = await callAI([{ role: "user", content: "Sinopsis apasionante de 4 párrafos:\n\n" + book.idea }], "Maestro novelista en español." + ctx, 800, book.aiSettings);
         onUpdate({ synopsis: r, step: 1 });
       } else if (step === 1) {
-        const r = await callAI([{ role: "user", content: "Esquema 12 capítulos:\n\n" + book.synopsis }], "Experto en estructura." + ctx, 1000);
+        const r = await callAI([{ role: "user", content: "Esquema 12 capítulos:\n\n" + book.synopsis }], "Experto en estructura." + ctx, 1000, book.aiSettings);
         onUpdate({ outline: r, step: 2 });
       } else if (step === 2) {
-        const r = await callAI([{ role: "user", content: "Story beats primeros 3 capítulos:\n\n" + book.outline }], "Experto en estructura narrativa." + ctx, 1000);
+        const r = await callAI([{ role: "user", content: "Story beats primeros 3 capítulos:\n\n" + book.outline }], "Experto en estructura narrativa." + ctx, 1000, book.aiSettings);
         onUpdate({ beats: r, step: 3 });
       } else if (step === 3) {
-        const r = await callAI([{ role: "user", content: "Primer capítulo completo, mínimo 800 palabras. Beats:\n\n" + book.beats }], "Novelista talentoso." + ctx, 1500);
+        const r = await callAI([{ role: "user", content: "Primer capítulo completo, mínimo 800 palabras. Beats:\n\n" + book.beats }], "Novelista talentoso." + ctx, 1500, book.aiSettings);
         onUpdate({ prose: r, step: 4 });
       }
     } catch (e) {

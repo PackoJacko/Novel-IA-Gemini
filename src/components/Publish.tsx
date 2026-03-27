@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Book } from '../types';
 import { Printer, Copy, Download, Check, Loader2, Book as BookIcon, Globe, Mail, Instagram, Twitter, FileText } from 'lucide-react';
-import { callAI } from '../lib/gemini';
+import { callAI } from '../lib/ai';
 
 interface PublishProps {
   book: Book | null;
@@ -38,7 +38,7 @@ export default function PublishComp({ book, onUpdate }: PublishProps) {
     setResult("");
     const fmt = FORMATS.find(f => f.id === format);
     try {
-      const r = await callAI([{ role: "user", content: `Adapta el siguiente texto al formato: ${fmt?.label}. \n\nTEXTO:\n${fullText.substring(0, 5000)}` }], "Editor profesional.", 1500);
+      const r = await callAI([{ role: "user", content: `Adapta el siguiente texto al formato: ${fmt?.label}. \n\nTEXTO:\n${fullText.substring(0, 5000)}` }], "Editor profesional.", 1500, book?.aiSettings);
       setResult(r);
     } catch (e) {
       console.error(e);
