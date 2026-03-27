@@ -44,7 +44,7 @@ export default function App() {
   useEffect(() => {
     const checkServer = async () => {
       try {
-        const res = await fetch("/api/health");
+        const res = await fetch(`/api/health?t=${Date.now()}`);
         if (res.ok) setServerStatus('ok');
         else setServerStatus('error');
       } catch (e) {

@@ -1,27 +1,32 @@
 import express from "express";
-console.log("[Server] Starting server.ts...");
 import { createServer as createViteServer } from "vite";
 import path from "path";
 import cors from "cors";
-import Anthropic from "@anthropic-ai/sdk";
+import { Anthropic } from "@anthropic-ai/sdk";
 import dotenv from "dotenv";
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
 async function startServer() {
-  const app = express();
-  const PORT = 3000;
+  console.log("[Server] Starting server initialization...");
+  try {
+    const app = express();
+    const PORT = 3000;
 
-  app.use(cors());
-  app.use(express.json());
+    app.use(cors());
+    app.use(express.json());
 
-  console.log("[Server] Initializing routes...");
+    console.log("[Server] Registering API routes...");
 
-  // Health check
-  app.get("/api/health", (req, res) => {
-    console.log("[Server] Health check requested");
-    res.json({ status: "ok", message: "Server is running" });
-  });
+    // Health check
+    app.get("/api/health", (req, res) => {
+      console.log("[Server] Health check hit");
+      res.json({ status: "ok", message: "Server is running", timestamp: new Date().toISOString() });
+    });
 
   // API route for Claude proxy
   app.post("/api/ai/claude", async (req, res) => {
@@ -73,9 +78,13 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`[Server] >>> SUCCESS: Server running on http://0.0.0.0:${PORT}`);
+    });
+  } catch (err) {
+    console.error("[Server] >>> CRITICAL ERROR during startup:", err);
+    process.exit(1);
+  }
 }
 
 startServer();
