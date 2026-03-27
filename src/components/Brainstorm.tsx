@@ -24,8 +24,9 @@ export default function Brainstorm({ book, onUpdate, aiSettings }: BrainstormPro
     try {
       const r = await callAI([{ role: "user", content: `Genera 10 ideas creativas para: ${cat}${ctx ? `\nContexto adicional: ${ctx}` : ""}\nUna idea por línea, sin numeración.` }], "Generador creativo de ideas.", 600, aiSettings);
       setResults(r.split("\n").map(l => l.trim()).filter(Boolean).slice(0, 10));
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      alert(e.message || "Error al generar ideas.");
     }
     setBusy(false);
   };

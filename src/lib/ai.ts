@@ -11,57 +11,67 @@ export async function callAI(
   settings?: AISettings
 ) {
   const provider = settings?.provider || 'gemini';
+  console.log(`[AI] Calling ${provider}...`, { systemInstruction, maxTokens });
   
   if (provider === 'claude') {
     const apiKey = settings?.claudeApiKey || import.meta.env.VITE_CLAUDE_API_KEY;
     if (!apiKey) {
-      throw new Error("Claude API Key is missing. Please add it in the book settings.");
+      throw new Error("Claude API Key is missing. Please add it in the settings modal.");
     }
 
-    const anthropic = new Anthropic({
-      apiKey,
-      dangerouslyAllowBrowser: true // Since we are calling from the frontend
-    });
+    try {
+      const anthropic = new Anthropic({
+        apiKey,
+        dangerouslyAllowBrowser: true
+      });
 
-    const response = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20240620",
-      max_tokens: maxTokens,
-      system: systemInstruction,
-      messages: messages.map(m => ({
-        role: m.role === "user" ? "user" : "assistant",
-        content: m.content
-      })) as any,
-    });
+      const response = await anthropic.messages.create({
+        model: "claude-3-5-sonnet-20240620",
+        max_tokens: maxTokens,
+        system: systemInstruction,
+        messages: messages.map(m => ({
+          role: m.role === "user" ? "user" : "assistant",
+          content: m.content
+        })) as any,
+      });
 
-    // Extract text content
-    const text = response.content
-      .filter(c => c.type === 'text')
-      .map(c => (c as any).text)
-      .join('\n');
+      const text = response.content
+        .filter(c => c.type === 'text')
+        .map(c => (c as any).text)
+        .join('\n');
 
-    return text || "";
+      return text || "";
+    } catch (error: any) {
+      console.error("[AI] Claude Error:", error);
+      throw new Error(`Error de Claude: ${error.message || "Error desconocido"}`);
+    }
   } else {
     // Default to Gemini
     if (!GEMINI_API_KEY) {
       throw new Error("Gemini API Key is missing.");
     }
 
-    const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-    
-    const contents = messages.map(m => ({
-      role: m.role === "user" ? "user" : "model",
-      parts: [{ text: m.content }]
-    }));
+    try {
+      const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+      
+      const contents = messages.map(m => ({
+        role: m.role === "user" ? "user" : "model",
+        parts: [{ text: m.content }]
+      }));
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents,
-      config: {
-        systemInstruction,
-        maxOutputTokens: maxTokens,
-      },
-    });
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents,
+        config: {
+          systemInstruction,
+          maxOutputTokens: maxTokens,
+        },
+      });
 
-    return response.text || "";
+      return response.text || "";
+    } catch (error: any) {
+      console.error("[AI] Gemini Error:", error);
+      throw new Error(`Error de Gemini: ${error.message || "Error desconocido"}`);
+    }
   }
 }

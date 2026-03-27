@@ -25,8 +25,9 @@ export default function StructureComp({ book, onUpdate, aiSettings }: StructureP
     try {
       const r = await callAI([{ role: "user", content: `Genera opciones para "${label}" en una historia con esta idea: ${book?.idea}` }], "Experto en estructura narrativa.", 600, aiSettings);
       saveStr({ [field]: r });
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      alert(e.message || "Error al generar estructura.");
     }
     setBusy(false);
     setAiField(null);

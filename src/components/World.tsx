@@ -25,8 +25,9 @@ export default function World({ book, onUpdate, aiSettings }: WorldProps) {
     try {
       const r = await callAI([{ role: "user", content: `Expande la sección de "${label}" para una historia con esta idea: ${book?.idea}` }], "Worldbuilder experto.", 600, aiSettings);
       saveWorld({ [field]: r });
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      alert(e.message || "Error al generar contenido del mundo.");
     }
     setBusy(false);
     setAiField(null);

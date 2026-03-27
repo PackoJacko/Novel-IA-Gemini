@@ -45,8 +45,9 @@ export default function Characters({ book, onUpdate, aiSettings }: CharactersPro
     try {
       const r = await callAI([{ role: "user", content: prompt }], "Psicólogo narrativo.", 500, aiSettings);
       setForm(prev => ({ ...prev, [field]: r }));
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      alert(e.message || "Error al generar sugerencia.");
     }
     setBusy(false);
     setAiField(null);

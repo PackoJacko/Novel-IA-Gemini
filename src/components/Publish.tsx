@@ -41,8 +41,9 @@ export default function PublishComp({ book, onUpdate, aiSettings }: PublishProps
     try {
       const r = await callAI([{ role: "user", content: `Adapta el siguiente texto al formato: ${fmt?.label}. \n\nTEXTO:\n${fullText.substring(0, 5000)}` }], "Editor profesional.", 1500, aiSettings);
       setResult(r);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      alert(e.message || "Error al generar formato de publicación.");
     }
     setBusy(false);
   };

@@ -121,8 +121,9 @@ export default function Manuscript({ book, onUpdate, aiSettings }: ManuscriptPro
     try {
       const r = await callAI([{ role: "user", content: pm[mode] + "\n\n\"" + selText + "\"" }], "Novelista experto." + buildCtx(), 800, aiSettings);
       setModal({ type: 'rewrite', mode, results: r });
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      alert(e.message || "Error al reescribir contenido.");
       setModal(null);
     }
     setBusy(false);
@@ -139,8 +140,9 @@ export default function Manuscript({ book, onUpdate, aiSettings }: ManuscriptPro
       
       const r = await callAI([{ role: "user", content: prompt }], "Maestro novelista. Contexto:\n" + buildCtx(), 2000, aiSettings);
       setModal({ type: 'generate', mode: activeChapter.title, results: r });
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      alert(e.message || "Error al generar capítulo.");
       setModal(null);
     }
     setBusy(false);

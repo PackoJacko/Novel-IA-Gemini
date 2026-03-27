@@ -21,7 +21,7 @@ import MapComp from './components/Map';
 import ImportComp from './components/Import';
 import PublishComp from './components/Publish';
 import { callAI } from './lib/ai';
-import { LogOut, Settings, Home, Cloud, CloudOff, Loader2, Cpu, Key } from 'lucide-react';
+import { LogOut, Settings, Home, Cloud, CloudOff, Loader2, Cpu, Key, Menu } from 'lucide-react';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -36,7 +36,7 @@ export default function App() {
   const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'offline'>('synced');
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
-  const [globalAiSettings, setGlobalAiSettings] = useState<any>(null);
+  const [globalAiSettings, setGlobalAiSettings] = useState<any>({ provider: 'gemini' });
 
   // Auth listener
   useEffect(() => {
@@ -64,6 +64,8 @@ export default function App() {
         }
         if (data.aiSettings) {
           setGlobalAiSettings(data.aiSettings);
+        } else {
+          setGlobalAiSettings({ provider: 'gemini' });
         }
       }
     }, (error) => {
@@ -131,6 +133,12 @@ export default function App() {
   const saveGlobalSettings = async (updates: any) => {
     if (!user) return;
     const path = `users/${user.uid}`;
+    
+    // Optimistic update
+    if (updates.aiSettings) {
+      setGlobalAiSettings((prev: any) => ({ ...prev, ...updates.aiSettings }));
+    }
+
     try {
       await setDoc(doc(db, path), updates, { merge: true });
     } catch (error) {
@@ -253,110 +261,114 @@ export default function App() {
         />
         {showLibrary && <LibraryPanel library={library} onOpen={openBook} onDelete={deleteBook} onClose={() => setShowLibrary(false)} />}
         {newBookType && <NewBookModal type={newBookType} library={library} onConfirm={createBook} onClose={() => setNewBookType(null)} />}
-        {showSettings && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[2000] p-4">
-            <div className="bg-[#1a1528] border border-[#7c3aed]/25 rounded-2xl w-full max-w-md shadow-2xl">
-              <div className="p-6 border-b border-[#7c3aed]/15 flex justify-between items-center">
-                <h3 className="text-lg font-serif text-[#fdf6e3]">Ajustes</h3>
-                <button onClick={() => setShowSettings(false)} className="text-[#c8b4ff]/40 hover:text-white transition-colors">✕</button>
-              </div>
-              <div className="p-6 space-y-6">
-                <div className="flex items-center gap-4 p-4 bg-white/5 border border-[#7c3aed]/15 rounded-xl">
-                  {user?.photoURL ? <img src={user.photoURL} className="w-10 h-10 rounded-full" alt="" /> : <div className="w-10 h-10 rounded-full bg-[#7c3aed] flex items-center justify-center text-white text-xl">{user?.displayName?.[0]}</div>}
-                  <div className="flex-1 overflow-hidden">
-                    <div className="text-sm font-serif font-semibold text-[#fdf6e3] truncate">{user?.displayName}</div>
-                    <div className="text-xs text-[#c8b4ff]/40 font-serif truncate">{user?.email}</div>
-                  </div>
-                </div>
-
-                {/* AI Settings */}
-                <div className="space-y-4 pt-4 border-t border-[#7c3aed]/15">
-                  <h4 className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-widest font-serif flex items-center gap-2">
-                    <Cpu size={12} /> Configuración de IA
-                  </h4>
-                  
-                  <div className="space-y-3">
-                    <label className="block text-xs text-[#c8b4ff]/60 font-serif">Proveedor de IA</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button 
-                        onClick={() => saveGlobalSettings({ aiSettings: { ...globalAiSettings, provider: 'gemini' } })}
-                        className={`py-2 px-3 rounded-lg border text-xs font-serif transition-all ${globalAiSettings?.provider !== 'claude' ? 'bg-[#7c3aed]/20 border-[#7c3aed] text-white' : 'bg-white/5 border-white/10 text-[#c8b4ff]/40 hover:bg-white/10'}`}
-                      >
-                        Google Gemini
-                      </button>
-                      <button 
-                        onClick={() => saveGlobalSettings({ aiSettings: { ...globalAiSettings, provider: 'claude' } })}
-                        className={`py-2 px-3 rounded-lg border text-xs font-serif transition-all ${globalAiSettings?.provider === 'claude' ? 'bg-[#7c3aed]/20 border-[#7c3aed] text-white' : 'bg-white/5 border-white/10 text-[#c8b4ff]/40 hover:bg-white/10'}`}
-                      >
-                        Anthropic Claude
-                      </button>
-                    </div>
-                  </div>
-
-                  {globalAiSettings?.provider === 'claude' && (
-                    <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <label className="block text-xs text-[#c8b4ff]/60 font-serif flex items-center gap-2">
-                        <Key size={12} /> Claude API Key
-                      </label>
-                      <input 
-                        type="password"
-                        placeholder="sk-ant-..."
-                        value={globalAiSettings?.claudeApiKey || ""}
-                        onChange={e => saveGlobalSettings({ aiSettings: { ...globalAiSettings, claudeApiKey: e.target.value } })}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg py-2 px-3 text-xs text-white font-mono outline-none focus:border-[#7c3aed]/50 transition-all"
-                      />
-                      <p className="text-[9px] text-[#c8b4ff]/30 font-serif leading-tight">
-                        Tu clave se guarda de forma segura en tu base de datos privada de Firebase.
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                <button 
-                  onClick={handleLogout}
-                  className="w-full py-3 rounded-xl border border-[#c8b4ff]/15 bg-transparent text-[#c8b4ff]/60 hover:bg-white/5 transition-all text-sm font-serif flex items-center justify-center gap-2"
-                >
-                  <LogOut size={16} />
-                  Cerrar sesión
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </>
     );
   }
 
   return (
     <div className="flex h-screen bg-[#f8f7f5] overflow-hidden relative">
+      {showSettings && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[2000] p-4">
+          <div className="bg-[#1a1528] border border-[#7c3aed]/25 rounded-2xl w-full max-w-md shadow-2xl">
+            <div className="p-6 border-b border-[#7c3aed]/15 flex justify-between items-center">
+              <h3 className="text-lg font-serif text-[#fdf6e3]">Ajustes</h3>
+              <button onClick={() => setShowSettings(false)} className="text-[#c8b4ff]/40 hover:text-white transition-colors">✕</button>
+            </div>
+            <div className="p-6 space-y-6">
+              <div className="flex items-center gap-4 p-4 bg-white/5 border border-[#7c3aed]/15 rounded-xl">
+                {user?.photoURL ? <img src={user.photoURL} className="w-10 h-10 rounded-full" alt="" /> : <div className="w-10 h-10 rounded-full bg-[#7c3aed] flex items-center justify-center text-white text-xl">{user?.displayName?.[0]}</div>}
+                <div className="flex-1 overflow-hidden">
+                  <div className="text-sm font-serif font-semibold text-[#fdf6e3] truncate">{user?.displayName}</div>
+                  <div className="text-xs text-[#c8b4ff]/40 font-serif truncate">{user?.email}</div>
+                </div>
+              </div>
+
+              {/* AI Settings */}
+              <div className="space-y-4 pt-4 border-t border-[#7c3aed]/15">
+                <h4 className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-widest font-serif flex items-center gap-2">
+                  <Cpu size={12} /> Configuración de IA
+                </h4>
+                
+                <div className="space-y-3">
+                  <label className="block text-xs text-[#c8b4ff]/60 font-serif">Proveedor de IA</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button 
+                      onClick={() => saveGlobalSettings({ aiSettings: { ...globalAiSettings, provider: 'gemini' } })}
+                      className={`py-2 px-3 rounded-lg border text-xs font-serif transition-all ${globalAiSettings?.provider !== 'claude' ? 'bg-[#7c3aed]/20 border-[#7c3aed] text-white' : 'bg-white/5 border-white/10 text-[#c8b4ff]/40 hover:bg-white/10'}`}
+                    >
+                      Google Gemini
+                    </button>
+                    <button 
+                      onClick={() => saveGlobalSettings({ aiSettings: { ...globalAiSettings, provider: 'claude' } })}
+                      className={`py-2 px-3 rounded-lg border text-xs font-serif transition-all ${globalAiSettings?.provider === 'claude' ? 'bg-[#7c3aed]/20 border-[#7c3aed] text-white' : 'bg-white/5 border-white/10 text-[#c8b4ff]/40 hover:bg-white/10'}`}
+                    >
+                      Anthropic Claude
+                    </button>
+                  </div>
+                </div>
+
+                {globalAiSettings?.provider === 'claude' && (
+                  <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <label className="block text-xs text-[#c8b4ff]/60 font-serif flex items-center gap-2">
+                      <Key size={12} /> Claude API Key
+                    </label>
+                    <input 
+                      type="password"
+                      placeholder="sk-ant-..."
+                      value={globalAiSettings?.claudeApiKey || ""}
+                      onChange={e => saveGlobalSettings({ aiSettings: { ...globalAiSettings, claudeApiKey: e.target.value } })}
+                      className="w-full bg-white/5 border border-white/10 rounded-lg py-2 px-3 text-xs text-white font-mono outline-none focus:border-[#7c3aed]/50 transition-all"
+                    />
+                    <p className="text-[9px] text-[#c8b4ff]/30 font-serif leading-tight">
+                      Tu clave se guarda de forma segura en tu base de datos privada de Firebase.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <button 
+                onClick={handleLogout}
+                className="w-full py-3 rounded-xl border border-[#c8b4ff]/15 bg-transparent text-[#c8b4ff]/60 hover:bg-white/5 transition-all text-sm font-serif flex items-center justify-center gap-2"
+              >
+                <LogOut size={16} />
+                Cerrar sesión
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/50 z-[299] backdrop-blur-[2px] md:hidden" />
       )}
 
       {/* Sidebar */}
-      <Sidebar 
-        activeBook={activeBook} 
-        view={view} 
-        setView={setView} 
-        setScreen={setScreen} 
-        setSidebarOpen={setSidebarOpen} 
-        sidebarOpen={sidebarOpen}
-        syncStatus={syncStatus}
-        savedAt={savedAt}
-        user={user}
-        library={library}
-      />
+        <Sidebar 
+          activeBook={activeBook} 
+          view={view} 
+          setView={setView} 
+          setScreen={setScreen} 
+          setSidebarOpen={setSidebarOpen} 
+          sidebarOpen={sidebarOpen}
+          syncStatus={syncStatus}
+          savedAt={savedAt}
+          user={user}
+          library={library}
+          onSettings={() => setShowSettings(true)}
+        />
 
       {/* Main Content */}
       <main className={`flex-1 overflow-y-auto ${view === 'mapa' ? '' : 'p-4 md:p-12 pt-16 md:pt-12'}`}>
         {/* Mobile Top Bar */}
         <div className="fixed top-0 left-0 right-0 h-14 bg-white border-b border-[#e8e5f0] flex items-center justify-between px-4 z-[200] shadow-sm md:hidden">
-          <button onClick={() => setSidebarOpen(true)} className="p-2 text-[#1a1825]"><Settings size={20} /></button>
+          <button onClick={() => setSidebarOpen(true)} className="p-2 text-[#1a1825]"><Menu size={20} /></button>
           <div className="flex-1 text-center truncate px-2 text-sm font-serif font-semibold text-[#1a1825]">
             {activeBook?.title}
           </div>
-          <button onClick={() => setScreen('home')} className="p-2 text-[#a09ab8]"><Home size={20} /></button>
+          <div className="flex items-center gap-1">
+            <button onClick={() => setShowSettings(true)} className="p-2 text-[#a09ab8]"><Settings size={20} /></button>
+            <button onClick={() => setScreen('home')} className="p-2 text-[#a09ab8]"><Home size={20} /></button>
+          </div>
         </div>
 
         <div className="max-w-4xl mx-auto">

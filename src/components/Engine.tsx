@@ -47,8 +47,9 @@ export default function Engine({ book, onUpdate, aiSettings }: EngineProps) {
         const r = await callAI([{ role: "user", content: "Primer capítulo completo, mínimo 800 palabras. Beats:\n\n" + book.beats }], "Novelista talentoso." + ctx, 1500, aiSettings);
         onUpdate({ prose: r, step: 4 });
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      alert(e.message || "Error al generar contenido. Revisa tu conexión o clave API.");
     }
     setBusy(false);
   };
