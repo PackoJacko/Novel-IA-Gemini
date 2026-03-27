@@ -36,6 +36,7 @@ export default function App() {
   const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'offline'>('synced');
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [globalAiSettings, setGlobalAiSettings] = useState<any>(null);
 
   // Auth listener
   useEffect(() => {
@@ -60,6 +61,9 @@ export default function App() {
         const data = docSnap.data();
         if (data.library) {
           setLibrary(data.library);
+        }
+        if (data.aiSettings) {
+          setGlobalAiSettings(data.aiSettings);
         }
       }
     }, (error) => {
@@ -123,6 +127,16 @@ export default function App() {
       handleFirestoreError(error, OperationType.WRITE, path);
     }
   }, [user, activeBook?.id]);
+
+  const saveGlobalSettings = async (updates: any) => {
+    if (!user) return;
+    const path = `users/${user.uid}`;
+    try {
+      await setDoc(doc(db, path), updates, { merge: true });
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, path);
+    }
+  };
 
   const createBook = async (data: any) => {
     if (!user) return;
@@ -265,21 +279,21 @@ export default function App() {
                     <label className="block text-xs text-[#c8b4ff]/60 font-serif">Proveedor de IA</label>
                     <div className="grid grid-cols-2 gap-2">
                       <button 
-                        onClick={() => saveBookData({ aiSettings: { ...activeBook?.aiSettings, provider: 'gemini' } as any })}
-                        className={`py-2 px-3 rounded-lg border text-xs font-serif transition-all ${activeBook?.aiSettings?.provider !== 'claude' ? 'bg-[#7c3aed]/20 border-[#7c3aed] text-white' : 'bg-white/5 border-white/10 text-[#c8b4ff]/40 hover:bg-white/10'}`}
+                        onClick={() => saveGlobalSettings({ aiSettings: { ...globalAiSettings, provider: 'gemini' } })}
+                        className={`py-2 px-3 rounded-lg border text-xs font-serif transition-all ${globalAiSettings?.provider !== 'claude' ? 'bg-[#7c3aed]/20 border-[#7c3aed] text-white' : 'bg-white/5 border-white/10 text-[#c8b4ff]/40 hover:bg-white/10'}`}
                       >
                         Google Gemini
                       </button>
                       <button 
-                        onClick={() => saveBookData({ aiSettings: { ...activeBook?.aiSettings, provider: 'claude' } as any })}
-                        className={`py-2 px-3 rounded-lg border text-xs font-serif transition-all ${activeBook?.aiSettings?.provider === 'claude' ? 'bg-[#7c3aed]/20 border-[#7c3aed] text-white' : 'bg-white/5 border-white/10 text-[#c8b4ff]/40 hover:bg-white/10'}`}
+                        onClick={() => saveGlobalSettings({ aiSettings: { ...globalAiSettings, provider: 'claude' } })}
+                        className={`py-2 px-3 rounded-lg border text-xs font-serif transition-all ${globalAiSettings?.provider === 'claude' ? 'bg-[#7c3aed]/20 border-[#7c3aed] text-white' : 'bg-white/5 border-white/10 text-[#c8b4ff]/40 hover:bg-white/10'}`}
                       >
                         Anthropic Claude
                       </button>
                     </div>
                   </div>
 
-                  {activeBook?.aiSettings?.provider === 'claude' && (
+                  {globalAiSettings?.provider === 'claude' && (
                     <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
                       <label className="block text-xs text-[#c8b4ff]/60 font-serif flex items-center gap-2">
                         <Key size={12} /> Claude API Key
@@ -287,8 +301,8 @@ export default function App() {
                       <input 
                         type="password"
                         placeholder="sk-ant-..."
-                        value={activeBook?.aiSettings?.claudeApiKey || ""}
-                        onChange={e => saveBookData({ aiSettings: { ...activeBook?.aiSettings, claudeApiKey: e.target.value } as any })}
+                        value={globalAiSettings?.claudeApiKey || ""}
+                        onChange={e => saveGlobalSettings({ aiSettings: { ...globalAiSettings, claudeApiKey: e.target.value } })}
                         className="w-full bg-white/5 border border-white/10 rounded-lg py-2 px-3 text-xs text-white font-mono outline-none focus:border-[#7c3aed]/50 transition-all"
                       />
                       <p className="text-[9px] text-[#c8b4ff]/30 font-serif leading-tight">
