@@ -220,6 +220,7 @@ export default function App() {
       setActiveBook(newBook);
       setScreen('app');
       setNewBookType(null);
+      setShowSettings(false); // Ensure settings don't pop up
     } catch (error) {
       console.error('Create book error:', error);
     }
@@ -383,12 +384,13 @@ export default function App() {
                         <Cpu size={12} /> Modelo de Claude
                       </label>
                       <select 
-                        value={globalAiSettings?.claudeModel || "claude-3-5-sonnet-latest"}
+                        value={globalAiSettings?.claudeModel || "claude-3-5-sonnet-20241022"}
                         onChange={e => saveGlobalSettings({ aiSettings: { ...globalAiSettings, claudeModel: e.target.value } })}
                         className="w-full bg-white/5 border border-white/10 rounded-lg py-2 px-3 text-xs text-white font-serif outline-none focus:border-[#7c3aed]/50 transition-all appearance-none"
                       >
-                        <option value="claude-3-5-sonnet-latest" className="bg-[#1a1625]">Claude 3.5 Sonnet (Recomendado)</option>
-                        <option value="claude-3-5-haiku-latest" className="bg-[#1a1625]">Claude 3.5 Haiku (Más rápido)</option>
+                        <option value="claude-3-5-sonnet-20241022" className="bg-[#1a1625]">Claude 3.5 Sonnet (Nuevo)</option>
+                        <option value="claude-3-5-sonnet-20240620" className="bg-[#1a1625]">Claude 3.5 Sonnet (Original)</option>
+                        <option value="claude-3-5-haiku-20241022" className="bg-[#1a1625]">Claude 3.5 Haiku (Más rápido)</option>
                         <option value="claude-3-opus-20240229" className="bg-[#1a1625]">Claude 3 Opus (Más potente)</option>
                         <option value="claude-3-sonnet-20240229" className="bg-[#1a1625]">Claude 3 Sonnet</option>
                         <option value="claude-3-haiku-20240307" className="bg-[#1a1625]">Claude 3 Haiku</option>

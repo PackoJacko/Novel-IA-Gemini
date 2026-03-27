@@ -30,7 +30,7 @@ export async function callAI(
             "dangerously-allow-browser": "true" // This is for the SDK, but we're using fetch
           },
           body: JSON.stringify({
-            model: settings?.claudeModel || "claude-3-5-sonnet-latest",
+            model: settings?.claudeModel || "claude-3-5-sonnet-20241022",
             max_tokens: maxTokens,
             system: systemInstruction,
             messages: messages.map(m => ({

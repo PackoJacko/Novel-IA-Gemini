@@ -53,7 +53,7 @@ async function startServer() {
     try {
       const anthropic = new Anthropic({ apiKey });
       const response = await anthropic.messages.create({
-        model: model || "claude-3-5-sonnet-latest",
+        model: model || "claude-3-5-sonnet-20241022",
         max_tokens: maxTokens || 2000,
         system: systemInstruction,
         messages: messages.map((m: any) => ({
