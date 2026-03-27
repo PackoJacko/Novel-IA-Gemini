@@ -39,19 +39,28 @@ export default function App() {
   const [globalAiSettings, setGlobalAiSettings] = useState<any>({ provider: 'gemini' });
   const [testingAi, setTestingAi] = useState(false);
   const [serverStatus, setServerStatus] = useState<'checking' | 'ok' | 'error'>('checking');
+  const [serverError, setServerError] = useState<string | null>(null);
 
   // Auth listener
   useEffect(() => {
     const checkServer = async () => {
       try {
         const res = await fetch(`/api/health?t=${Date.now()}`);
-        if (res.ok) setServerStatus('ok');
-        else setServerStatus('error');
-      } catch (e) {
+        if (res.ok) {
+          setServerStatus('ok');
+          setServerError(null);
+        } else {
+          setServerStatus('error');
+          const text = await res.text();
+          setServerError(`HTTP ${res.status}: ${text.substring(0, 100)}...`);
+        }
+      } catch (e: any) {
         setServerStatus('error');
+        setServerError(e.message || "Error de red");
       }
     };
     checkServer();
+    const interval = setInterval(checkServer, 15000);
 
     const unsub = onAuthStateChanged(auth, (fbUser) => {
       setUser(fbUser);
@@ -62,7 +71,11 @@ export default function App() {
         setScreen('login');
       }
     });
-    return unsub;
+
+    return () => {
+      clearInterval(interval);
+      unsub();
+    };
   }, []);
 
   // Library listener
@@ -319,7 +332,17 @@ export default function App() {
               <div className="space-y-4 pt-4 border-t border-[#7c3aed]/15">
                 <h4 className="text-[10px] font-bold text-[#a78bfa] uppercase tracking-widest font-serif flex items-center gap-2">
                   <Cpu size={12} /> Configuración de IA
-                  <span className={`ml-auto w-2 h-2 rounded-full ${serverStatus === 'ok' ? 'bg-green-500' : serverStatus === 'checking' ? 'bg-yellow-500 animate-pulse' : 'bg-red-500'}`} title={serverStatus === 'ok' ? 'Servidor activo' : 'Servidor inactivo'} />
+                  <div className="ml-auto flex items-center gap-2">
+                    {serverError && (
+                      <button 
+                        onClick={() => alert(`Error del servidor:\n${serverError}`)}
+                        className="text-[9px] text-red-400 hover:underline"
+                      >
+                        Ver error
+                      </button>
+                    )}
+                    <span className={`w-2 h-2 rounded-full ${serverStatus === 'ok' ? 'bg-green-500' : serverStatus === 'checking' ? 'bg-yellow-500 animate-pulse' : 'bg-red-500'}`} title={serverStatus === 'ok' ? 'Servidor activo' : 'Servidor inactivo'} />
+                  </div>
                 </h4>
                 
                 <div className="space-y-3">
@@ -342,6 +365,19 @@ export default function App() {
 
                 {globalAiSettings?.provider === 'claude' && (
                   <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10">
+                      <div className="space-y-0.5">
+                        <div className="text-xs text-[#fdf6e3] font-serif">Modo Directo (Experimental)</div>
+                        <div className="text-[10px] text-[#c8b4ff]/40 font-serif">Bypassear el servidor proxy</div>
+                      </div>
+                      <button 
+                        onClick={() => saveGlobalSettings({ aiSettings: { ...globalAiSettings, useDirectClaude: !globalAiSettings?.useDirectClaude } })}
+                        className={`w-10 h-5 rounded-full transition-colors relative ${globalAiSettings?.useDirectClaude ? 'bg-[#7c3aed]' : 'bg-white/10'}`}
+                      >
+                        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${globalAiSettings?.useDirectClaude ? 'left-6' : 'left-1'}`} />
+                      </button>
+                    </div>
+
                     <div className="space-y-2">
                       <label className="block text-xs text-[#c8b4ff]/60 font-serif flex items-center gap-2">
                         <Cpu size={12} /> Modelo de Claude
@@ -382,6 +418,12 @@ export default function App() {
                       {testingAi ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
                       {testingAi ? "Probando..." : "Probar conexión"}
                     </button>
+                    
+                    {serverStatus === 'error' && (
+                      <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-[10px] text-red-300 font-serif leading-relaxed">
+                        <strong>Nota:</strong> El servidor proxy no responde. Si el Modo Directo falla por CORS, intenta abrir la app en una pestaña nueva o revisa la consola.
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

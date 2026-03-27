@@ -22,12 +22,28 @@ async function startServer() {
 
   // API Routes
   app.get("/api/health", (req, res) => {
-    console.log("[Server] Health check hit");
-    res.json({ status: "ok", timestamp: new Date().toISOString() });
+    console.log("[Server] Health check hit from", req.ip);
+    res.json({ 
+      status: "ok", 
+      timestamp: new Date().toISOString(),
+      env: process.env.NODE_ENV || 'development',
+      uptime: process.uptime()
+    });
+  });
+
+  // Debug route to see all registered routes
+  app.get("/api/debug/routes", (req, res) => {
+    const routes: string[] = [];
+    app._router.stack.forEach((middleware: any) => {
+      if (middleware.route) {
+        routes.push(`${Object.keys(middleware.route.methods).join(',').toUpperCase()} ${middleware.route.path}`);
+      }
+    });
+    res.json({ routes });
   });
 
   app.post("/api/ai/claude", async (req, res) => {
-    console.log("[Server] Claude request received");
+    console.log("[Server] Claude request received", { model: req.body.model });
     const { messages, systemInstruction, maxTokens, apiKey, model } = req.body;
 
     if (!apiKey) {

@@ -18,6 +18,41 @@ export async function callAI(
       throw new Error("Claude API Key is missing. Please add it in the settings modal.");
     }
 
+    if (settings?.useDirectClaude) {
+      console.log("[AI] Using Direct Claude Mode (Browser Fetch)");
+      try {
+        const response = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": apiKey,
+            "anthropic-version": "2023-06-01",
+            "dangerously-allow-browser": "true" // This is for the SDK, but we're using fetch
+          },
+          body: JSON.stringify({
+            model: settings?.claudeModel || "claude-3-5-sonnet-latest",
+            max_tokens: maxTokens,
+            system: systemInstruction,
+            messages: messages.map(m => ({
+              role: m.role === "user" ? "user" : "assistant",
+              content: m.content
+            })),
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error?.message || "Error calling Anthropic API directly");
+        }
+
+        const data = await response.json();
+        return data.content[0].text || "";
+      } catch (error: any) {
+        console.error("[AI] Direct Claude Error:", error);
+        throw new Error(`Error de Claude (Directo): ${error.message || "Error de CORS o red"}. El modo directo suele fallar en navegadores por seguridad. Usa el modo normal (Proxy).`);
+      }
+    }
+
     try {
       const response = await fetch("/api/ai/claude", {
         method: "POST",

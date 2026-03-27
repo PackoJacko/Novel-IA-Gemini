@@ -34,6 +34,7 @@ export interface AISettings {
   provider: 'gemini' | 'claude';
   claudeApiKey?: string;
   claudeModel?: string;
+  useDirectClaude?: boolean;
 }
 
 export interface Character {

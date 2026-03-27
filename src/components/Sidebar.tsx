@@ -41,9 +41,19 @@ const NAV = [
   { group: "PLANIFICACIÓN", items: [{ id: "planning", icon: <Layout size={16} />, label: "Tablero" }, { id: "escaleta", icon: <AlignLeft size={16} />, label: "Escaleta" }, { id: "structure", icon: <Diamond size={16} />, label: "Estructura" }] },
   { group: "UNIVERSO", items: [{ id: "characters", icon: <Circle size={16} />, label: "Personajes" }, { id: "world", icon: <Circle size={16} />, label: "Mundo" }, { id: "voice", icon: <Diamond size={16} />, label: "Voz & Técnica" }] },
   { group: "HERRAMIENTAS", items: [{ id: "brainstorm", icon: <Sparkles size={16} />, label: "Brainstorm" }, { id: "mapa", icon: <Hexagon size={16} />, label: "Mapa" }, { id: "importar", icon: <Download size={16} />, label: "Importar" }, { id: "publicar", icon: <Printer size={16} />, label: "Publicar" }, { id: "codex", icon: <Square size={16} />, label: "Codex" }, { id: "lorebook", icon: <Command size={16} />, label: "Lorebook" }] },
+  { group: "SISTEMA", items: [{ id: "settings_btn", icon: <Settings size={16} />, label: "Ajustes de IA" }] },
 ];
 
 export default function Sidebar({ activeBook, view, setView, setScreen, setSidebarOpen, sidebarOpen, syncStatus, savedAt, user, library, onSettings }: SidebarProps) {
+  const handleNav = (id: string) => {
+    if (id === 'settings_btn') {
+      onSettings();
+    } else {
+      setView(id);
+    }
+    setSidebarOpen(false);
+  };
+
   return (
     <aside className={`fixed inset-y-0 left-0 z-[300] w-[210px] bg-white border-r border-[#e8e5f0] flex flex-col transition-transform duration-300 md:relative md:translate-x-0 ${sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:shadow-none'}`}>
       {/* Book header */}
@@ -74,7 +84,7 @@ export default function Sidebar({ activeBook, view, setView, setScreen, setSideb
               {group.items.map(item => (
                 <button 
                   key={item.id} 
-                  onClick={() => { setView(item.id); setSidebarOpen(false); }}
+                  onClick={() => handleNav(item.id)}
                   className={`flex items-center gap-2.5 px-3 py-2 w-full rounded-xl transition-all text-left font-serif text-sm ${view === item.id ? 'bg-[#ede9fe] text-[#7c3aed] font-semibold' : 'text-[#6b6580] hover:bg-[#f8f7f5]'}`}
                 >
                   <span className={`shrink-0 ${view === item.id ? 'text-[#7c3aed]' : 'text-[#a09ab8]'}`}>{item.icon}</span>
