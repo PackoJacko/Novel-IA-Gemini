@@ -6,11 +6,12 @@ import { Zap, RotateCcw, ArrowRight, Loader2 } from 'lucide-react';
 interface EngineProps {
   book: Book | null;
   onUpdate: (updates: Partial<Book>) => void;
+  aiSettings?: any;
 }
 
 const STEPS = ["Idea", "Sinopsis", "Esquema", "Beats", "Prosa"];
 
-export default function Engine({ book, onUpdate }: EngineProps) {
+export default function Engine({ book, onUpdate, aiSettings }: EngineProps) {
   const [busy, setBusy] = useState(false);
   const step = book?.step || 0;
 
@@ -34,16 +35,16 @@ export default function Engine({ book, onUpdate }: EngineProps) {
     const ctx = buildCtx();
     try {
       if (step === 0) {
-        const r = await callAI([{ role: "user", content: "Sinopsis apasionante de 4 párrafos:\n\n" + book.idea }], "Maestro novelista en español." + ctx, 800, book.aiSettings);
+        const r = await callAI([{ role: "user", content: "Sinopsis apasionante de 4 párrafos:\n\n" + book.idea }], "Maestro novelista en español." + ctx, 800, aiSettings);
         onUpdate({ synopsis: r, step: 1 });
       } else if (step === 1) {
-        const r = await callAI([{ role: "user", content: "Esquema 12 capítulos:\n\n" + book.synopsis }], "Experto en estructura." + ctx, 1000, book.aiSettings);
+        const r = await callAI([{ role: "user", content: "Esquema 12 capítulos:\n\n" + book.synopsis }], "Experto en estructura." + ctx, 1000, aiSettings);
         onUpdate({ outline: r, step: 2 });
       } else if (step === 2) {
-        const r = await callAI([{ role: "user", content: "Story beats primeros 3 capítulos:\n\n" + book.outline }], "Experto en estructura narrativa." + ctx, 1000, book.aiSettings);
+        const r = await callAI([{ role: "user", content: "Story beats primeros 3 capítulos:\n\n" + book.outline }], "Experto en estructura narrativa." + ctx, 1000, aiSettings);
         onUpdate({ beats: r, step: 3 });
       } else if (step === 3) {
-        const r = await callAI([{ role: "user", content: "Primer capítulo completo, mínimo 800 palabras. Beats:\n\n" + book.beats }], "Novelista talentoso." + ctx, 1500, book.aiSettings);
+        const r = await callAI([{ role: "user", content: "Primer capítulo completo, mínimo 800 palabras. Beats:\n\n" + book.beats }], "Novelista talentoso." + ctx, 1500, aiSettings);
         onUpdate({ prose: r, step: 4 });
       }
     } catch (e) {

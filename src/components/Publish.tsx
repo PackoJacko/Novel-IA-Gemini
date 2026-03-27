@@ -6,6 +6,7 @@ import { callAI } from '../lib/ai';
 interface PublishProps {
   book: Book | null;
   onUpdate: (updates: Partial<Book>) => void;
+  aiSettings?: any;
 }
 
 const FORMATS = [
@@ -17,7 +18,7 @@ const FORMATS = [
   { id: "guion", icon: <FileText size={20} />, label: "Guión Cine", color: "#ef4444", desc: "INT./EXT., diálogos centrados." },
 ];
 
-export default function PublishComp({ book, onUpdate }: PublishProps) {
+export default function PublishComp({ book, onUpdate, aiSettings }: PublishProps) {
   const [format, setFormat] = useState<string | null>(null);
   const [result, setResult] = useState("");
   const [busy, setBusy] = useState(false);
@@ -38,7 +39,7 @@ export default function PublishComp({ book, onUpdate }: PublishProps) {
     setResult("");
     const fmt = FORMATS.find(f => f.id === format);
     try {
-      const r = await callAI([{ role: "user", content: `Adapta el siguiente texto al formato: ${fmt?.label}. \n\nTEXTO:\n${fullText.substring(0, 5000)}` }], "Editor profesional.", 1500, book?.aiSettings);
+      const r = await callAI([{ role: "user", content: `Adapta el siguiente texto al formato: ${fmt?.label}. \n\nTEXTO:\n${fullText.substring(0, 5000)}` }], "Editor profesional.", 1500, aiSettings);
       setResult(r);
     } catch (e) {
       console.error(e);

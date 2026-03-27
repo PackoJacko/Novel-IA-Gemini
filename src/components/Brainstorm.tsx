@@ -6,11 +6,12 @@ import { callAI } from '../lib/ai';
 interface BrainstormProps {
   book: Book | null;
   onUpdate: (updates: Partial<Book>) => void;
+  aiSettings?: any;
 }
 
 const CATEGORIES = ["nombres", "giros", "objetos mágicos", "locaciones", "facciones", "conflictos", "poderes", "profecías"];
 
-export default function Brainstorm({ book, onUpdate }: BrainstormProps) {
+export default function Brainstorm({ book, onUpdate, aiSettings }: BrainstormProps) {
   const [cat, setCat] = useState(CATEGORIES[0]);
   const [ctx, setCtx] = useState("");
   const [results, setResults] = useState<string[]>([]);
@@ -21,7 +22,7 @@ export default function Brainstorm({ book, onUpdate }: BrainstormProps) {
   const run = async () => {
     setBusy(true);
     try {
-      const r = await callAI([{ role: "user", content: `Genera 10 ideas creativas para: ${cat}${ctx ? `\nContexto adicional: ${ctx}` : ""}\nUna idea por línea, sin numeración.` }], "Generador creativo de ideas.", 600, book?.aiSettings);
+      const r = await callAI([{ role: "user", content: `Genera 10 ideas creativas para: ${cat}${ctx ? `\nContexto adicional: ${ctx}` : ""}\nUna idea por línea, sin numeración.` }], "Generador creativo de ideas.", 600, aiSettings);
       setResults(r.split("\n").map(l => l.trim()).filter(Boolean).slice(0, 10));
     } catch (e) {
       console.error(e);

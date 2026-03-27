@@ -360,19 +360,19 @@ export default function App() {
         </div>
 
         <div className="max-w-4xl mx-auto">
-          {view === 'engine' && <Engine book={activeBook} onUpdate={saveBookData} />}
-          {view === 'manuscript' && <Manuscript book={activeBook} onUpdate={saveBookData} />}
-          {view === 'characters' && <Characters book={activeBook} onUpdate={saveBookData} />}
-          {view === 'world' && <World book={activeBook} onUpdate={saveBookData} />}
-          {view === 'structure' && <StructureComp book={activeBook} onUpdate={saveBookData} />}
+          {view === 'engine' && <Engine book={activeBook} onUpdate={saveBookData} aiSettings={globalAiSettings} />}
+          {view === 'manuscript' && <Manuscript book={activeBook} onUpdate={saveBookData} aiSettings={globalAiSettings} />}
+          {view === 'characters' && <Characters book={activeBook} onUpdate={saveBookData} aiSettings={globalAiSettings} />}
+          {view === 'world' && <World book={activeBook} onUpdate={saveBookData} aiSettings={globalAiSettings} />}
+          {view === 'structure' && <StructureComp book={activeBook} onUpdate={saveBookData} aiSettings={globalAiSettings} />}
           {view === 'escaleta' && <EscaletaComp book={activeBook} onUpdate={saveBookData} />}
           {view === 'planning' && <Planning book={activeBook} onUpdate={saveBookData} />}
           {view === 'codex' && <Codex book={activeBook} onUpdate={saveBookData} />}
           {view === 'lorebook' && <Lorebook book={activeBook} onUpdate={saveBookData} />}
-          {view === 'brainstorm' && <Brainstorm book={activeBook} onUpdate={saveBookData} />}
+          {view === 'brainstorm' && <Brainstorm book={activeBook} onUpdate={saveBookData} aiSettings={globalAiSettings} />}
           {view === 'mapa' && <MapComp book={activeBook} onUpdate={saveBookData} />}
-          {view === 'importar' && <ImportComp book={activeBook} onUpdate={saveBookData} />}
-          {view === 'publicar' && <PublishComp book={activeBook} onUpdate={saveBookData} />}
+          {view === 'importar' && <ImportComp book={activeBook} onUpdate={saveBookData} aiSettings={globalAiSettings} />}
+          {view === 'publicar' && <PublishComp book={activeBook} onUpdate={saveBookData} aiSettings={globalAiSettings} />}
         </div>
       </main>
 

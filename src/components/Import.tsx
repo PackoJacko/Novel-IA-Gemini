@@ -7,9 +7,10 @@ import * as mammoth from 'mammoth';
 interface ImportProps {
   book: Book | null;
   onUpdate: (updates: Partial<Book>) => void;
+  aiSettings?: any;
 }
 
-export default function ImportComp({ book, onUpdate }: ImportProps) {
+export default function ImportComp({ book, onUpdate, aiSettings }: ImportProps) {
   const [step, setStep] = useState(0);
   const [files, setFiles] = useState<{ name: string, text: string, ok: boolean }[]>([]);
   const [busy, setBusy] = useState(false);
@@ -74,7 +75,7 @@ export default function ImportComp({ book, onUpdate }: ImportProps) {
     ${combined.substring(0, 10000)}`;
 
     try {
-      const r = await callAI([{ role: "user", content: prompt }], "Analista literario experto. Responde solo JSON.", 2000, book?.aiSettings);
+      const r = await callAI([{ role: "user", content: prompt }], "Analista literario experto. Responde solo JSON.", 2000, aiSettings);
       const jsonStr = r.replace(/```json|```/g, "").trim();
       const parsed = JSON.parse(jsonStr);
       setExtracted(parsed);

@@ -6,6 +6,7 @@ import { Edit3, Sparkles, Loader2, X, Check, Plus, Trash2, ChevronRight, BookOpe
 interface ManuscriptProps {
   book: Book | null;
   onUpdate: (updates: Partial<Book>) => void;
+  aiSettings?: any;
 }
 
 const TOOLS = [
@@ -21,7 +22,7 @@ const TOOLS = [
   { id: "metafora", label: "🌿 Metáfora", group: "narrativa" },
 ];
 
-export default function Manuscript({ book, onUpdate }: ManuscriptProps) {
+export default function Manuscript({ book, onUpdate, aiSettings }: ManuscriptProps) {
   const [activeChapterId, setActiveChapterId] = useState<string | null>(null);
   const [selText, setSelText] = useState("");
   const [selRange, setSelRange] = useState<[number, number]>([0, 0]);
@@ -118,7 +119,7 @@ export default function Manuscript({ book, onUpdate }: ManuscriptProps) {
       metafora: "Añade metáforas:",
     };
     try {
-      const r = await callAI([{ role: "user", content: pm[mode] + "\n\n\"" + selText + "\"" }], "Novelista experto." + buildCtx(), 800, book?.aiSettings);
+      const r = await callAI([{ role: "user", content: pm[mode] + "\n\n\"" + selText + "\"" }], "Novelista experto." + buildCtx(), 800, aiSettings);
       setModal({ type: 'rewrite', mode, results: r });
     } catch (e) {
       console.error(e);
@@ -136,7 +137,7 @@ export default function Manuscript({ book, onUpdate }: ManuscriptProps) {
       Usa toda la información de contexto proporcionada. 
       Mínimo 1000 palabras. Estilo literario de alta calidad.`;
       
-      const r = await callAI([{ role: "user", content: prompt }], "Maestro novelista. Contexto:\n" + buildCtx(), 2000, book?.aiSettings);
+      const r = await callAI([{ role: "user", content: prompt }], "Maestro novelista. Contexto:\n" + buildCtx(), 2000, aiSettings);
       setModal({ type: 'generate', mode: activeChapter.title, results: r });
     } catch (e) {
       console.error(e);

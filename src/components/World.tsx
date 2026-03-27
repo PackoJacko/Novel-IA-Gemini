@@ -6,9 +6,10 @@ import { callAI } from '../lib/ai';
 interface WorldProps {
   book: Book | null;
   onUpdate: (updates: Partial<Book>) => void;
+  aiSettings?: any;
 }
 
-export default function World({ book, onUpdate }: WorldProps) {
+export default function World({ book, onUpdate, aiSettings }: WorldProps) {
   const [busy, setBusy] = useState(false);
   const [aiField, setAiField] = useState<string | null>(null);
 
@@ -22,7 +23,7 @@ export default function World({ book, onUpdate }: WorldProps) {
     setBusy(true);
     setAiField(field);
     try {
-      const r = await callAI([{ role: "user", content: `Expande la sección de "${label}" para una historia con esta idea: ${book?.idea}` }], "Worldbuilder experto.", 600, book?.aiSettings);
+      const r = await callAI([{ role: "user", content: `Expande la sección de "${label}" para una historia con esta idea: ${book?.idea}` }], "Worldbuilder experto.", 600, aiSettings);
       saveWorld({ [field]: r });
     } catch (e) {
       console.error(e);

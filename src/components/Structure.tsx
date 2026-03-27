@@ -6,9 +6,10 @@ import { callAI } from '../lib/ai';
 interface StructureProps {
   book: Book | null;
   onUpdate: (updates: Partial<Book>) => void;
+  aiSettings?: any;
 }
 
-export default function StructureComp({ book, onUpdate }: StructureProps) {
+export default function StructureComp({ book, onUpdate, aiSettings }: StructureProps) {
   const [busy, setBusy] = useState(false);
   const [aiField, setAiField] = useState<string | null>(null);
 
@@ -22,7 +23,7 @@ export default function StructureComp({ book, onUpdate }: StructureProps) {
     setBusy(true);
     setAiField(field);
     try {
-      const r = await callAI([{ role: "user", content: `Genera opciones para "${label}" en una historia con esta idea: ${book?.idea}` }], "Experto en estructura narrativa.", 600, book?.aiSettings);
+      const r = await callAI([{ role: "user", content: `Genera opciones para "${label}" en una historia con esta idea: ${book?.idea}` }], "Experto en estructura narrativa.", 600, aiSettings);
       saveStr({ [field]: r });
     } catch (e) {
       console.error(e);

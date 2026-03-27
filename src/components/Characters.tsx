@@ -6,6 +6,7 @@ import { callAI } from '../lib/ai';
 interface CharactersProps {
   book: Book | null;
   onUpdate: (updates: Partial<Book>) => void;
+  aiSettings?: any;
 }
 
 const ROLES = [
@@ -16,7 +17,7 @@ const ROLES = [
   { id: "other", label: "Otro", color: "#a09ab8" },
 ];
 
-export default function Characters({ book, onUpdate }: CharactersProps) {
+export default function Characters({ book, onUpdate, aiSettings }: CharactersProps) {
   const [form, setForm] = useState<Partial<Character> | null>(null);
   const [busy, setBusy] = useState(false);
   const [aiField, setAiField] = useState<string | null>(null);
@@ -42,7 +43,7 @@ export default function Characters({ book, onUpdate }: CharactersProps) {
     setBusy(true);
     setAiField(field);
     try {
-      const r = await callAI([{ role: "user", content: prompt }], "Psicólogo narrativo.", 500, book?.aiSettings);
+      const r = await callAI([{ role: "user", content: prompt }], "Psicólogo narrativo.", 500, aiSettings);
       setForm(prev => ({ ...prev, [field]: r }));
     } catch (e) {
       console.error(e);
