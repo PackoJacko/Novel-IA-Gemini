@@ -6,41 +6,36 @@ import { Anthropic } from "@anthropic-ai/sdk";
 import dotenv from "dotenv";
 import { fileURLToPath } from 'url';
 
+dotenv.config();
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config();
-
 async function startServer() {
-  console.log("[Server] Starting server initialization...");
-  try {
-    const app = express();
-    const PORT = 3000;
+  console.log("[Server] Starting...");
+  
+  const app = express();
+  const PORT = 3000;
 
-    app.use(cors());
-    app.use(express.json());
+  app.use(cors());
+  app.use(express.json());
 
-    console.log("[Server] Registering API routes...");
+  // API Routes
+  app.get("/api/health", (req, res) => {
+    console.log("[Server] Health check hit");
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
 
-    // Health check
-    app.get("/api/health", (req, res) => {
-      console.log("[Server] Health check hit");
-      res.json({ status: "ok", message: "Server is running", timestamp: new Date().toISOString() });
-    });
-
-  // API route for Claude proxy
   app.post("/api/ai/claude", async (req, res) => {
+    console.log("[Server] Claude request received");
     const { messages, systemInstruction, maxTokens, apiKey, model } = req.body;
 
     if (!apiKey) {
-      return res.status(400).json({ error: "Claude API Key is missing." });
+      return res.status(400).json({ error: "API Key missing" });
     }
 
     try {
-      const anthropic = new Anthropic({
-        apiKey,
-      });
-
+      const anthropic = new Anthropic({ apiKey });
       const response = await anthropic.messages.create({
         model: model || "claude-3-5-sonnet-latest",
         max_tokens: maxTokens || 2000,
@@ -58,19 +53,21 @@ async function startServer() {
 
       res.json({ text });
     } catch (error: any) {
-      console.error("[Server AI] Claude Error:", error);
-      res.status(500).json({ error: error.message || "Error calling Claude API" });
+      console.error("[Server] Claude Error:", error);
+      res.status(500).json({ error: error.message || "Internal Server Error" });
     }
   });
 
-  // Vite middleware for development
+  // Vite integration
   if (process.env.NODE_ENV !== "production") {
+    console.log("[Server] Initializing Vite middleware...");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
   } else {
+    console.log("[Server] Serving static files...");
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
@@ -78,13 +75,11 @@ async function startServer() {
     });
   }
 
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`[Server] >>> SUCCESS: Server running on http://0.0.0.0:${PORT}`);
-    });
-  } catch (err) {
-    console.error("[Server] >>> CRITICAL ERROR during startup:", err);
-    process.exit(1);
-  }
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`[Server] Running at http://0.0.0.0:${PORT}`);
+  });
 }
 
-startServer();
+startServer().catch((err) => {
+  console.error("[Server] Failed to start:", err);
+});
